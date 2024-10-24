@@ -22,19 +22,7 @@ from .ChatBot import QdrantGroqService
 
 
 
-@require_GET
-def sse_bot_response(request):
-    async def generate():
-        responses = "Hello! How can I assist you today?".split(" ")
-        for response in responses:
-            print(f"Sending response: {response}")  # Log the response
-            yield f"data: {response}\n\n"  # Remove the newline characters
-            await asyncio.sleep(2)  # Simulate delay for response
 
-    response = StreamingHttpResponse(generate(), content_type='text/event-stream')
-    response['Cache-Control'] = 'no-cache'
-    response['Connection'] = 'keep-alive'  # Keep connection alive
-    return response
 
 
 @api_view(['POST'])
@@ -62,14 +50,6 @@ def register(request):
         return Response({'error': 'Username already exists'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET'])
-@permission_classes([AllowAny])
-def get_user_details(request):
-    print(request.headers)
-    print(request.auth)
-    user = request.user
-    serializer = UserSerializer(request.user)
-    return Response(serializer.data)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -85,7 +65,6 @@ def create_new_session(request):
             status=status.HTTP_201_CREATED
         )
     except Exception as e:
-        print(e)
         return Response(
             {
                 "error":"Somthing went to wrong..."
@@ -128,12 +107,15 @@ def get_bot_response(request):
        
         async def generate():
             qdrant_service = QdrantGroqService()
-            responses = qdrant_service.generate_response(message,chat_session.context)
-            output=""
-            for response in responses.split():
-                yield f"{response}\n\n"  
-                output+=response+" "
-                await asyncio.sleep(0.01)  
+            responses = qdrant_service.generate_response(message, chat_session.context)
+            print("\n\n\n",responses.encode(encoding = 'UTF-8') )
+            output = ""
+            for response in responses.split('\n'):
+                string=f"{response}\n"
+                yield string.encode(encoding = 'UTF-8') 
+                output += response +str('\n') 
+                print(response)
+                await asyncio.sleep(0.1)
             await sync_to_async(ChatMessage.objects.create)(
                 session=chat_session,
                 bot_reply=output,
@@ -152,12 +134,10 @@ def get_bot_response(request):
         response = StreamingHttpResponse(generate(), content_type='text/event-stream')
         response['Cache-Control'] = 'no-cache'
         response['Connection'] = 'keep-alive'  
-        print(chat_session.title)
         response['Chat-Title'] = chat_session.title
         
         return response
     except Exception as e:
-        print(e)
         return JsonResponse(
             {
                 "error":"Somthing went to wrong..."
@@ -170,7 +150,6 @@ def get_bot_response(request):
 @permission_classes([IsAuthenticated])
 def get_sessions(request):
     id=request.query_params.get('id')
-    print(id)
     try:
         if id:
             try:
