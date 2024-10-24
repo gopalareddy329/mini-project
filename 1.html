@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h1>SSE Test</h1>
+    <div id="response"></div>
+    <script>
+        const source = new EventSource('http://127.0.0.1:8000/api/get_bot_response/');
+        
+        source.onmessage = (event) => {
+            // Handle incoming messages from the server
+            console.log('Message from server:', event.data);
+            setResponses((prevResponses) => [...prevResponses, event.data]);
+        };
+
+        source.onerror = (error) => {
+            console.error('EventSource failed:', error);
+            source.close(); // Close the connection on error
+        };
+    </script>
+</body>
+</html>
