@@ -41,7 +41,7 @@ const SideBar = ({data,loading,chatLoading,createNewChat}) => {
             }>
               
             {sideBar ? (
-                <div className={`w-[250px] min-h-full `}>
+                <div className={`w-full min-h-full `}>
                   {!loading &&(
                       <React.Fragment>
             

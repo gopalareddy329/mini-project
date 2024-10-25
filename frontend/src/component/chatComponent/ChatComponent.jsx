@@ -1,25 +1,20 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { IoSend } from 'react-icons/io5';
-import { GiFlowers } from 'react-icons/gi';
 import { useNavigate, useParams } from 'react-router-dom';
 import SideBar from '../sideBar/SideBar';
 import { API_BASE_URL } from '../../pages/utils/Base_API';
 import AuthContext from '../../context/AuthContext';
+import { IoLogoElectron } from "react-icons/io5";
 
 const parseMessage = (message) => {
   return message
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/^\*\s*(.+)/gm, '<li>$1</li>') 
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/\n+/g, '<br/>')
-};
-
-const parseMessageHistory = (message) => {
-  return message
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/^\*\s*(.+)/gm, '<li>$1</li>')
     .replace(/\n/g, '<br/>')
 };
+
+
 
 const ChatComponent = () => {
   const { chatId } = useParams();
@@ -60,7 +55,7 @@ const ChatComponent = () => {
       const newMessage = { message, bot_reply: '' };
       setUserChat((prev) => [...(prev || []), newMessage]);
       setChatLoading(true);
-
+  
       const response = await fetch(`${API_BASE_URL}/get_bot_response/`, {
         method: 'POST',
         headers: {
@@ -69,7 +64,7 @@ const ChatComponent = () => {
         },
         body: JSON.stringify({ session_id: chatId, message }),
       });
-
+  
       if (response.ok) {
         setHistory((prev) => {
           const updatedHistory = [...prev];
@@ -79,39 +74,43 @@ const ChatComponent = () => {
           return updatedHistory;
         });
       }
-
+  
       const reader = response.body.getReader();
       const decoder = new TextDecoder('utf-8');
-
+  
       let botReply = '';
-      
-
+  
       let { done, value } = await reader.read();
       while (!done) {
         const chunk = decoder.decode(value, { stream: true });
-
-        botReply += `${chunk} `;
-
+  
+        botReply += chunk;  // Accumulate the bot reply
+  
+        // Replace multiple newlines with <br/> once here
+        const formattedReply = parseMessage(botReply);
+  
         setUserChat((prev) => {
           if (prev && prev.length > 0) {
             const updatedChat = [...prev];
             updatedChat[updatedChat.length - 1] = {
               ...updatedChat[updatedChat.length - 1],
-              bot_reply: parseMessage(botReply),
+              bot_reply: formattedReply,
             };
             return updatedChat;
           }
           return prev;
         });
-
+  
         ({ done, value } = await reader.read());
       }
+  
     } catch (err) {
       console.error('Error in getResponse:', err);
     } finally {
       setChatLoading(false);
     }
   };
+  
 
   const createNewChat = async (message) => {
     try {
@@ -216,8 +215,8 @@ const ChatComponent = () => {
                       <p>{item.message}</p>
                     </div>
                     <div className="my-10 flex items-start gap-5">
-                      <span className={`${(key===userChat.length-1 && chatLoading)  &&('animate-spin')}`}>{<GiFlowers size={20}/>}</span>
-                      <p className='leading-[1.2rem]' dangerouslySetInnerHTML={{ __html: parseMessageHistory(item.bot_reply) }} />
+                      <span className={`${(key===userChat.length-1 && chatLoading)  &&('animate-spin duration-100')}`}>{<IoLogoElectron size={25}/>}</span>
+                      <p className='leading-[1.5rem]' dangerouslySetInnerHTML={{ __html: parseMessage(item.bot_reply) }} />
                     </div>
                   </div>
                 ))
@@ -239,10 +238,10 @@ const ChatComponent = () => {
                 id="message"
                 placeholder="Message..."
                 name="message"
-                className="w-full bg-[#d9dcde] rounded-l-lg h-10 p-5"
+                className="w-full bg-[#d9dcde] rounded-l-lg h-10 p-5 focus:outline-none"
                 required
               />
-              <button disabled={disable} className={`p-2 ${disable ? 'bg-[#7f868b]' : 'bg-[#1f93e0]'} text-white rounded-r-lg`}>
+              <button disabled={disable} className={`p-2 h-10 ${disable ? 'bg-[#7f868b]' : 'bg-[#1f93e0]'} text-white rounded-r-lg`}>
                 <IoSend size={25} />
               </button>
             </form>

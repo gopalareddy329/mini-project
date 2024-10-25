@@ -2,6 +2,7 @@ import React, { useContext } from 'react'
 import AuthContext from '../../context/AuthContext'
 import { MdLogout } from "react-icons/md";
 import { Link } from 'react-router-dom';
+import { IoLogoElectron } from "react-icons/io5";
 const NavBar = () => {
   const {user,logoutUser}=useContext(AuthContext)
   return (
@@ -14,9 +15,7 @@ const NavBar = () => {
     >
           <div className="flex items-center gap-4 text-[#111517]">
             <div className="size-4">
-              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M44 4H30.6666V17.3334H17.3334V30.6666H4V44H44V4Z" fill="currentColor"></path>
-              </svg>
+              <IoLogoElectron className='' size={20}/>
             </div>
             <h2 className="text-[#111517] text-lg font-bold leading-tight tracking-[-0.015em]">Finance Ai</h2>
           </div>
