@@ -108,14 +108,13 @@ def get_bot_response(request):
         async def generate():
             qdrant_service = QdrantGroqService()
             responses = qdrant_service.generate_response(message, chat_session.context)
-            print("\n\n\n",responses.encode(encoding = 'UTF-8') )
             output = ""
             for response in responses.split('\n'):
                 string=f"{response}\n"
                 yield string.encode(encoding = 'UTF-8') 
                 output += response +str('\n') 
                 print(response)
-                await asyncio.sleep(0.1)
+                await asyncio.sleep(0.2)
             await sync_to_async(ChatMessage.objects.create)(
                 session=chat_session,
                 bot_reply=output,

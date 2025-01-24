@@ -176,6 +176,9 @@ const ChatComponent = () => {
 
       const result = await response.json();
       setHistory(result);
+      if(!chatId && result[0]?.id){
+        navigator(`${result[0]?.id}`)
+      }
       if (result.length === 0) createNewChat();
     } catch (error) {
       console.error('Error fetching previous sessions:', error);

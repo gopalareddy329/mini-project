@@ -60,7 +60,7 @@ class QdrantGroqService:
         Context:
         {context}
 
-        Based on the above, answer the following query:
+        Based on the above, answer the following query and if the question is not related to Context reply what user can ask you:
 
         {query}
         """

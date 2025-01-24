@@ -87,7 +87,7 @@ export const AuthProvider = () =>{
       };
       
     useEffect(()=>{
-        if(isTokenExpired(authToken.access)){
+        if(isTokenExpired(authToken?.access)){
             navigate('/login')
         }
     },[])
